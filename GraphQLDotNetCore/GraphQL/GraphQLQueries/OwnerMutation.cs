@@ -7,7 +7,7 @@ using System;
 
 namespace GraphQLDotNetCore.GraphQL.GraphQLQueries
 {
-    public class OwnerMutation: ObjectGraphType
+    public class OwnerMutation : ObjectGraphType
     {
         public OwnerMutation(IOwnerRepository repository)
         {
@@ -21,9 +21,9 @@ namespace GraphQLDotNetCore.GraphQL.GraphQLQueries
                 });
 
             Field<OwnerType>(
-                name:"updateOwner",
+                name: "updateOwner",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<OwnerInputType>> {Name = "owner" },
+                    new QueryArgument<NonNullGraphType<OwnerInputType>> { Name = "owner" },
                     new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "ownerId" }),
                 resolve: context =>
                 {
@@ -35,12 +35,35 @@ namespace GraphQLDotNetCore.GraphQL.GraphQLQueries
                     {
                         context.Errors.Add(new ExecutionError("Couldn´t find owner in db.."));
                         return null;
-                    
+
                     }
                     return repository.UpdateOwner(dbOwner, owner);
 
                 }
-            );   
+            );
+
+            Field<StringGraphType>(
+                name: "deleteOwner",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "ownerId" }),
+                resolve: context =>
+                {
+                    var ownerId = context.GetArgument<Guid>("ownerId");
+
+                    var owner = repository.GetById(ownerId);
+
+                    if (owner == null)
+                    {
+                        context.Errors.Add(new ExecutionError("Couldn´t find owner in db.."));
+                        return null;
+
+                    }
+
+                    repository.DeleteOwner(owner);
+                    return $"The owner woth the id {ownerId} has been successfully deleted from db.";
+                }
+               );
+
         }
     }
 }

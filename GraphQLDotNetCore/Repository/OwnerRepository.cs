@@ -37,6 +37,12 @@ namespace GraphQLDotNetCore.Repository
             return dbOwner;
         }
 
+        public void DeleteOwner(Owner owner)
+        {
+            _context.Remove(owner);
+            _context.SaveChanges();
+        }
+
 
     }
 }
